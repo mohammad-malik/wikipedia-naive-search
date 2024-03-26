@@ -1,69 +1,8 @@
 import pandas as pd
-import re
-from math import log
 from collections import Counter
-import string
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 from nltk.tokenize import word_tokenize
-import pandas as pd
-import re
-from math import log
-from collections import Counter
-import string
-from nltk.corpus import stopwords
-from nltk.stem import WordNetLemmatizer
-from nltk.tokenize import word_tokenize
-
-
-# Define the preprocessing function
-def preprocess_text(text):
-    if isinstance(text, str):
-        text = text.lower()
-        text = re.sub(r"[0-9]+", "", text)
-        text = re.sub(f"[{re.escape(string.punctuation)}]", "", text)
-
-        # Tokenize the text
-        tokens = word_tokenize(text)
-
-        # Remove stopwords and words with length of less than 3
-        stop_words_set = set(stopwords.words("english"))
-        tokens = [
-            word for word in tokens if word not in stop_words_set and len(word) > 2
-        ]
-
-        # Lemmatize the words
-        lemmatizer = WordNetLemmatizer()
-        lemmatized_tokens = [lemmatizer.lemmatize(word) for word in tokens]
-
-    else:
-        tokens = []
-    return tokens
-
-
-# Define the preprocessing function
-def preprocess_text(text):
-    if isinstance(text, str):
-        text = text.lower()
-        text = re.sub(r"[0-9]+", "", text)
-        text = re.sub(f"[{re.escape(string.punctuation)}]", "", text)
-
-        # Tokenize the text
-        tokens = word_tokenize(text)
-
-        # Remove stopwords and words with length of less than 3
-        stop_words_set = set(stopwords.words("english"))
-        tokens = [
-            word for word in tokens if word not in stop_words_set and len(word) > 2
-        ]
-
-        # Lemmatize the words
-        lemmatizer = WordNetLemmatizer()
-        lemmatized_tokens = [lemmatizer.lemmatize(word) for word in tokens]
-
-    else:
-        tokens = []
-    return tokens
 
 
 file_path = "preprocessed_dataset.csv"
@@ -75,54 +14,50 @@ df_grouped = (
 )
 
 # Preprocess and tokenize text for each article
-df_grouped["TOKENS"] = df_grouped["SECTION_TEXT"].apply(preprocess_text)
+df_grouped["TOKENS"] = df_grouped["SECTION_TEXT"].apply(word_tokenize)
 
-# Create a vocabulary with unique IDs
-all_tokens = set(token for tokens_list in df_grouped["TOKENS"] for token in tokens_list)
-vocabulary = sorted(all_tokens)
-word_to_id = {word: idx for idx, word in enumerate(vocabulary)}
-
-
-# Calculate Term Frequency (TF) for each article
-def calculate_tf(tokens_list):
-    return Counter(tokens_list)
-
-
-df_grouped["TF"] = df_grouped["TOKENS"].apply(calculate_tf)
-
-# Calculate Document Frequency (DF)
-document_frequencies = Counter(
-    word for tokens in df_grouped["TOKENS"] for word in set(tokens)
+vocabulary = sorted(
+    set(token for tokens_list in df_grouped["TOKENS"] for token in tokens_list)
 )
+word_to_id = {word: index for index, word in enumerate(vocabulary)}
+
+# Calculate TF for each article
+df_grouped["TF"] = df_grouped["TOKENS"].apply(Counter)
+print(f"before:{df_grouped.shape}")
+
+# df_grouped['TF'] = df_grouped['TF'].apply(lambda tf_dict: {word_id: tf for word_id, tf in tf_dict.items() if tf != 0})
 
 # Calculate Inverse Document Frequency (IDF)
-total_docs = len(df_grouped)
-idfs = {
-    word: log((total_docs / (document_frequencies[word] + 1))) + 1
-    for word in vocabulary
-}
+dfs = Counter(word for tokens_list in df_grouped["TOKENS"] for word in set(tokens_list))
 
 
-# Calculate TF-IDF for each article
-def calculate_tfidf(tf_dict):
-    return {word_to_id[word]: (tf * idfs[word]) for word, tf in tf_dict.items()}
+# Calculate TF-IDF
+def calculate_tfidf(tf_dict, dfs, total_docs):
+    return {word: (tf / dfs[word]) for word, tf in tf_dict.items() if word in dfs}
 
 
-df_grouped["TFIDF"] = df_grouped["TF"].apply(calculate_tfidf)
+# Apply TF-IDF calculation
+df_grouped["TFIDF"] = df_grouped["TF"].apply(
+    lambda tf: calculate_tfidf(tf, dfs, len(df_grouped))
+)
 
-# Saving outputs
 tf_output_file = "article_term_frequencies.csv"
-with open(tf_output_file, "w", encoding="utf-8") as tf_file:
-    for index, row in df_grouped.iterrows():
-        tf_file.write(f"{row['ARTICLE_ID']},{row['TF']}\n")
+with open(tf_output_file, "w", encoding="utf-8") as file:
+    for _, row in df_grouped.iterrows():
+        tf_str = ", ".join(
+            f"({word_to_id[word]}, {tf})" for word, tf in row["TF"].items()
+        )
+        file.write(f"{row['ARTICLE_ID']},{tf_str}\n")
 
-vocab_file_path = "article_vocabulary.txt"
-idfs_file_path = "article_idfs.txt"
+idf_output_file = "article_document_frequencies.csv"
+with open(idf_output_file, "w", encoding="utf-8") as file:
+    for word, df in dfs.items():
+        file.write(f"{word_to_id[word]},{df}\n")
 
-with open(vocab_file_path, "w", encoding="utf-8") as vocab_file:
-    for word, idx in word_to_id.items():
-        vocab_file.write(f"{idx}: {word}\n")
-
-with open(idfs_file_path, "w", encoding="utf-8") as idfs_file:
-    for word, idf in idfs.items():
-        idfs_file.write(f"{word_to_id[word]}: {idf}\n")
+tfidf_output_file = "article_tfidf_scores.csv"
+with open(tfidf_output_file, "w", encoding="utf-8") as file:
+    for _, row in df_grouped.iterrows():
+        tfidf_str = ", ".join(
+            f"({word_to_id[word]}, {tfidf:.2f})" for word, tfidf in row["TFIDF"].items()
+        )
+        file.write(f"{row['ARTICLE_ID']},{tfidf_str}\n")

@@ -1,7 +1,5 @@
 import pandas as pd
 from collections import Counter
-from nltk.corpus import stopwords
-from nltk.stem import WordNetLemmatizer
 from nltk.tokenize import word_tokenize
 
 
@@ -23,9 +21,11 @@ word_to_id = {word: index for index, word in enumerate(vocabulary)}
 
 # Calculate TF for each article
 df_grouped["TF"] = df_grouped["TOKENS"].apply(Counter)
-print(f"before:{df_grouped.shape}")
+# print(f"before:{df_grouped.shape}")
 
-# df_grouped['TF'] = df_grouped['TF'].apply(lambda tf_dict: {word_id: tf for word_id, tf in tf_dict.items() if tf != 0})
+df_grouped["TF"] = df_grouped["TF"].apply(
+    lambda tf_dict: {word_id: tf for word_id, tf in tf_dict.items() if tf != 0}
+)
 
 # Calculate Inverse Document Frequency (IDF)
 dfs = Counter(word for tokens_list in df_grouped["TOKENS"] for word in set(tokens_list))
@@ -41,6 +41,11 @@ df_grouped["TFIDF"] = df_grouped["TF"].apply(
     lambda tf: calculate_tfidf(tf, dfs, len(df_grouped))
 )
 
+vocabulary_file = "vocabulary.csv"
+with open(vocabulary_file, "w", encoding="utf-8") as file:
+    for index, word in enumerate(vocabulary):
+        file.write(f"{index},{word}\n")
+        
 tf_output_file = "article_term_frequencies.csv"
 with open(tf_output_file, "w", encoding="utf-8") as file:
     for _, row in df_grouped.iterrows():

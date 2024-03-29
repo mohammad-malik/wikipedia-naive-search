@@ -14,6 +14,7 @@ def preprocess_text(text):
     # Converting to lowercase and removing numbers and punctuation.
     text = text.lower()
     text = re.sub(r"[0-9]+", "", text)
+    text = re.sub(r"http\S+", "", text)
     text = re.sub(f"[{re.escape(string.punctuation)}]", "", text)
 
     # Removing stopwords and words with length of less than 3.

@@ -160,3 +160,8 @@ cython_debug/
 #.idea/
 enwiki-20170820.csv
 randomly_selected_chunk.csv
+result/vocabulary.csv
+result/article_tfidf_scores.csv
+result/article_term_frequencies.csv
+result/article_document_frequencies.csv
+preprocessed_dataset.csv

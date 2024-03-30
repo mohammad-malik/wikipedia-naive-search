@@ -10,7 +10,7 @@ def preprocess_text(text):
     # Checking for null values.
     if pd.isnull(text):
         return ""
-    
+
     # Converting to lowercase and removing numbers and punctuation.
     text = text.lower()
     text = re.sub(r"[0-9]+", "", text)
@@ -20,8 +20,8 @@ def preprocess_text(text):
     # Removing stopwords and words with length of less than 3.
     stop_words = set(stopwords.words("english"))
     tokens = [
-         word 
-         for word in word_tokenize(text) 
+         word
+         for word in word_tokenize(text)
          if word not in stop_words and len(word) > 2
         ]
 

@@ -6,6 +6,7 @@ from nltk.stem import WordNetLemmatizer
 from nltk.tokenize import word_tokenize
 
 
+# Function to preprocess text data.
 def preprocess_text(text):
     # Checking for null values.
     if pd.isnull(text):

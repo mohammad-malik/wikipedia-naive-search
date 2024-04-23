@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+
 import sys
 from collections import defaultdict
 
@@ -22,12 +23,21 @@ for line in sys.stdin:
         # Query vector
         term, tf = parts
         query_vector[term] = float(tf)
+
     elif len(parts) == 3:
         # Document vectors
         doc_id, term, tfidf = parts[0], parts[1], float(parts[2])
         doc_vectors[doc_id][term] = tfidf
 
-# Calculate and emit inner product similarity for each document
+# Calculate inner product similarity for each document
+similarity_scores = []
 for doc_id, vec in doc_vectors.items():
     similarity = calculate_inner_product_similarity(vec, query_vector)
-    print(f"{doc_id}\t{similarity}")
+    similarity_scores.append((doc_id, similarity))
+
+# Sort the scores in descending order
+similarity_scores.sort(key=lambda x: x[1], reverse=True)
+
+# Print the top 5 sorted scores.
+for doc_id, similarity in similarity_scores[:5]:
+    print(f'doc {doc_id}: {similarity}')

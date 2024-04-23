@@ -1,12 +1,16 @@
 #!/usr/bin/python3
 
-import os
 import re
+import sys
 
-# Query is passed as an environment variable or command line argument
-query = os.environ.get('QUERY', 'default query').lower()
-query_terms = re.findall(r'\w+', query)
 
-# Emit term frequencies for the query
-for term in set(query_terms):
-    print(f'{term}\t{query_terms.count(term)}')
+for line in sys.stdin:
+    # Parse the input line
+    text = line.strip()
+
+    # Tokenize the text
+    terms = re.findall(r'\w+', text)
+
+    # Emit term frequencies for the document
+    for term in set(terms):
+        print(f'{term}\t{terms.count(term)}')

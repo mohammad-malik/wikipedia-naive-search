@@ -47,7 +47,3 @@ Ensure you have these software and libraries installed on your system before pro
 - **Mohammad Malik**: [GitHub](https://github.com/mohammad-malik)
 - **Aqsa Fayaz**: [GitHub](https://github.com/Aqsa-Fayyaz)
 
-
-### Important notes:
-<li> Hadoop sucks. </li>
-<li> Honest to God, no other assignment has made me this angry in my life. The constant issues that plagued it to the very end has made this the most displeasurable experience since joining university.</li>

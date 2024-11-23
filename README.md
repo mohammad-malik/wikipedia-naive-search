@@ -45,5 +45,5 @@ Ensure you have these software and libraries installed on your system before pro
 
 - **Manal Aamir**: [GitHub](https://github.com/manal-aamir)
 - **Mohammad Malik**: [GitHub](https://github.com/mohammad-malik)
-- **Aqsa Fayaz**: [GitHub](https://github.com/Aqsa-Fayyaz)
+- **Aqsa Fayaz**: [GitHub](https://github.com/Aqsa-Fayaz)
 
